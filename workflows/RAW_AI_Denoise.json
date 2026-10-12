@@ -1,0 +1,456 @@
+{
+  "last_node_id": 11,
+  "last_link_id": 9,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "RawDenoise_LoadRAW",
+      "pos": [
+        480,
+        40
+      ],
+      "size": [
+        360,
+        240
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "raw",
+          "type": "RAW_IMAGE",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "preview",
+          "type": "IMAGE",
+          "links": [
+            4,
+            9
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "info",
+          "type": "STRING",
+          "links": [],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "RawDenoise_LoadRAW"
+      },
+      "widgets_values": [
+        "(click 'Choose RAW file(s)\u2026' below)",
+        "AHD",
+        "",
+        0,
+        "fixed"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "RawDenoise_RawNIND",
+      "pos": [
+        480,
+        330
+      ],
+      "size": [
+        360,
+        250
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "raw",
+          "type": "RAW_IMAGE",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "raw",
+          "type": "RAW_IMAGE",
+          "links": [
+            2,
+            3
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "RawDenoise_RawNIND"
+      },
+      "widgets_values": [
+        50,
+        100,
+        "rawdenoise-nind.dtmodel",
+        "auto",
+        "auto",
+        512
+      ],
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 4,
+      "type": "RawDenoise_Develop",
+      "pos": [
+        880,
+        220
+      ],
+      "size": [
+        340,
+        160
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "raw",
+          "type": "RAW_IMAGE",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": [
+            5,
+            6,
+            8
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "RawDenoise_Develop"
+      },
+      "widgets_values": [
+        "auto (same as original)",
+        0,
+        "as shot",
+        "contrast"
+      ]
+    },
+    {
+      "id": 5,
+      "type": "RawDenoise_SaveDNG",
+      "pos": [
+        880,
+        40
+      ],
+      "size": [
+        340,
+        130
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "raw",
+          "type": "RAW_IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "dng_path",
+          "type": "STRING",
+          "links": [],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "RawDenoise_SaveDNG"
+      },
+      "widgets_values": [
+        "-Enhanced-NR",
+        "raw_denoise",
+        false
+      ]
+    },
+    {
+      "id": 6,
+      "type": "RawDenoise_CompareCrop",
+      "pos": [
+        880,
+        430
+      ],
+      "size": [
+        340,
+        180
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "before",
+          "type": "IMAGE",
+          "link": 4
+        },
+        {
+          "name": "after",
+          "type": "IMAGE",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "comparison",
+          "type": "IMAGE",
+          "links": [
+            7
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "RawDenoise_CompareCrop"
+      },
+      "widgets_values": [
+        0.5,
+        0.5,
+        640,
+        "100%"
+      ]
+    },
+    {
+      "id": 7,
+      "type": "PreviewImage",
+      "pos": [
+        1260,
+        40
+      ],
+      "size": [
+        820,
+        500
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 7
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [],
+      "title": "Before / After (100% crop)"
+    },
+    {
+      "id": 8,
+      "type": "PreviewImage",
+      "pos": [
+        1260,
+        580
+      ],
+      "size": [
+        400,
+        330
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 8
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [],
+      "title": "Denoised (full frame)"
+    },
+    {
+      "id": 9,
+      "type": "RawDenoise_SaveTIFF16",
+      "pos": [
+        880,
+        660
+      ],
+      "size": [
+        340,
+        90
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 6
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "RawDenoise_SaveTIFF16"
+      },
+      "widgets_values": [
+        "raw_denoise/ComfyUI"
+      ],
+      "title": "Save Image (16-bit TIFF) - bypassed, Ctrl+B to enable"
+    },
+    {
+      "id": 10,
+      "type": "Note",
+      "pos": [
+        20,
+        40
+      ],
+      "size": [
+        430,
+        600
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "Note"
+      },
+      "widgets_values": [
+        "RAW AI DENOISE  (Lightroom-style)\n\n1. On 'Load RAW Image' click  \ud83d\udcc2 Choose RAW file(s)\u2026  and pick your ARW / CR3 / NEF / RAF ... files (Ctrl- or Shift-click for several). You can also drag files from Explorer/Finder onto that node. They are copied into ComfyUI/input/raw.\n\n2. Press Run. The first run downloads the AI model (58 MB) into models/raw_denoise.\n   Picked several files? Run processes the one shown in raw_file; '\u25b6 Queue all N selected files' processes every one of them.\n\n3. 'RAW AI Denoise' works on the raw sensor data (denoise + demosaic in one pass, like Lightroom). Amount works like Lightroom's slider (default 50). Changing only Amount / color_noise re-uses the cached network result, so tuning is quick.\n\n4. 'Save Linear DNG' writes <name>-Enhanced-NR.dng to ComfyUI/output/raw_denoise (clear output_folder to save next to the original). Open it in Lightroom / Camera Raw and edit it like a raw file.\n\n5. Check the 100% crop on the right (move center_x / center_y). The 16-bit TIFF saver is bypassed - select it and press Ctrl+B to enable it.\n\nIf something fails, the error message says why (most often: the 'rawpy' package isn't installed in ComfyUI's own Python - see README)."
+      ],
+      "title": "How to use",
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 11,
+      "type": "PreviewImage",
+      "pos": [
+        1680,
+        580
+      ],
+      "size": [
+        400,
+        330
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 9
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [],
+      "title": "Original (full frame)"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "RAW_IMAGE"
+    ],
+    [
+      2,
+      2,
+      0,
+      5,
+      0,
+      "RAW_IMAGE"
+    ],
+    [
+      3,
+      2,
+      0,
+      4,
+      0,
+      "RAW_IMAGE"
+    ],
+    [
+      4,
+      1,
+      1,
+      6,
+      0,
+      "IMAGE"
+    ],
+    [
+      5,
+      4,
+      0,
+      6,
+      1,
+      "IMAGE"
+    ],
+    [
+      6,
+      4,
+      0,
+      9,
+      0,
+      "IMAGE"
+    ],
+    [
+      7,
+      6,
+      0,
+      7,
+      0,
+      "IMAGE"
+    ],
+    [
+      8,
+      4,
+      0,
+      8,
+      0,
+      "IMAGE"
+    ],
+    [
+      9,
+      1,
+      1,
+      11,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.75,
+      "offset": [
+        120,
+        40
+      ]
+    }
+  },
+  "version": 0.4
+}
