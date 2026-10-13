@@ -1,9 +1,9 @@
 [project]
 name = "comfyui-raw-denoise"
-description = "Lightroom-style AI noise reduction for camera RAW files (RawNIND joint denoise + demosaic), with linear DNG output."
-version = "1.0.0"
+description = "AI noise reduction for camera RAW photos (RawNIND, Lightroom-style linear DNG output) and video (FastDVDnet, streamed for long clips, low VRAM, resumable)."
+version = "1.1.0"
 license = { file = "LICENSE" }
-dependencies = ["rawpy>=0.19", "tifffile>=2023.1.1"]
+dependencies = ["rawpy>=0.19", "tifffile>=2023.1.1", "imageio-ffmpeg>=0.5"]
 
 [tool.comfy]
 DisplayName = "RAW AI Denoise"

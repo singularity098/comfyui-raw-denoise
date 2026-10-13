@@ -16,6 +16,20 @@ from .onnx_lite import OnnxGraph
 SUPPORTED_OPS = {"Conv", "LeakyRelu", "MaxPool", "ConvTranspose", "Concat", "DepthToSpace", "Relu", "Add"}
 
 
+def last_uses(graph: OnnxGraph) -> dict:
+    """node index -> names whose last consumer is that node (so they can be freed)."""
+    last = {}
+    for i, nd in enumerate(graph.nodes):
+        for name in nd.inputs:
+            if name and name not in graph.initializers:
+                last[name] = i
+    out = {}
+    for name, i in last.items():
+        if name not in graph.outputs:
+            out.setdefault(i, []).append(name)
+    return out
+
+
 def check_supported(graph: OnnxGraph) -> None:
     bad = sorted({n.op_type for n in graph.nodes} - SUPPORTED_OPS)
     if bad:
@@ -27,8 +41,15 @@ def check_supported(graph: OnnxGraph) -> None:
 # ----------------------------------------------------------------------------
 
 def _np_conv(x, w, b, pads, strides, dilations, group):
-    if group != 1 or any(d != 1 for d in dilations):
-        raise NotImplementedError("numpy backend: grouped/dilated conv not supported")
+    if any(d != 1 for d in dilations):
+        raise NotImplementedError("numpy backend: dilated conv not supported")
+    if group != 1:
+        ci_g = x.shape[1] // group
+        co_g = w.shape[0] // group
+        outs = [_np_conv(x[:, g * ci_g:(g + 1) * ci_g], w[g * co_g:(g + 1) * co_g],
+                         None if b is None else b[g * co_g:(g + 1) * co_g], pads, strides, dilations, 1)
+                for g in range(group)]
+        return np.concatenate(outs, axis=1)
     pt, pl, pb, pr = pads
     x = np.pad(x, ((0, 0), (0, 0), (pt, pb), (pl, pr)))
     n, c, h, wd = x.shape
@@ -82,11 +103,12 @@ class NumpyGraph:
     def __init__(self, graph: OnnxGraph):
         check_supported(graph)
         self.g = graph
+        self.free = last_uses(graph)
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
         env = dict(self.g.initializers)
         env[self.g.inputs[0]] = x.astype(np.float32)
-        for nd in self.g.nodes:
+        for idx, nd in enumerate(self.g.nodes):
             a = nd.attrs
             ins = [env[i] if i else None for i in nd.inputs]
             op = nd.op_type
@@ -114,6 +136,8 @@ class NumpyGraph:
             else:  # pragma: no cover
                 raise NotImplementedError(op)
             env[nd.outputs[0]] = y
+            for name in self.free.get(idx, ()):
+                env.pop(name, None)
         return env[self.g.outputs[0]]
 
 
@@ -137,6 +161,7 @@ class TorchGraph:
             for k, v in graph.initializers.items()
             if v.dtype.kind == "f"
         }
+        self.free = last_uses(graph)
 
     def to(self, device):
         if device != self.device:
@@ -149,7 +174,8 @@ class TorchGraph:
         F = torch.nn.functional
         env = dict(self.params)
         env[self.g.inputs[0]] = x.to(device=self.device, dtype=self.dtype)
-        for nd in self.g.nodes:
+        del x  # keep only the graph's reference, so the input can be freed early
+        for idx, nd in enumerate(self.g.nodes):
             a = nd.attrs
             ins = [env[i] if i else None for i in nd.inputs]
             op = nd.op_type
@@ -197,4 +223,7 @@ class TorchGraph:
             else:  # pragma: no cover
                 raise NotImplementedError(op)
             env[nd.outputs[0]] = y
+            del ins, y
+            for name in self.free.get(idx, ()):  # free activations after their last use
+                env.pop(name, None)
         return env[self.g.outputs[0]]
